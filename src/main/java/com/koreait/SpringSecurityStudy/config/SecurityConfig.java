@@ -1,5 +1,6 @@
 package com.koreait.SpringSecurityStudy.config;
 
+import com.koreait.SpringSecurityStudy.security.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,20 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration //설정 파일 명시
 public class SecurityConfig { //도메인 간의 요청에 대한 보안설정
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    /*
+     BCryptPasswordEncoder
+     - 비밀번호를 안전하게 암호화(해싱)하고, 검증하는 역할
+     - 단방향 해시이므로 복호화 불가능
+       따라서 클라이언트의 요청으로 들어온 비밀번호를 암호화하여 저장된 데이터와 비교
+     */
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
     /*
      CorsConfigurationSource
      - Spring Security 에서 CORS(Cross-Origin Resource Sharing)을 처리하기 위한 설정
@@ -55,7 +70,7 @@ public class SecurityConfig { //도메인 간의 요청에 대한 보안설정
          CSRF(Cross-Site Request Forgery)
          - 사용자가 의도하지 않은 요청을 공격자가 유도해서 서버에 전달하도록 하는 공격
          - 세션-쿠키 기반의 인증방식의 경우 csrf를 활성화해서 세션 정보가 노출되지 않도록 공격에 방어해야한다.
-           (해당 프로젝트의 경우 요청마다 토큰을 사용하는 무상태 방식이므로 csrf를 비활성화한다.)
+           (해당 프로젝트의 경우 요청마다 토큰을 사용하는 비상태 방식이므로 csrf를 비활성화한다.)
          */
         http.csrf(csrf -> csrf.disable()); //CSRF 보호 비활성화
 
@@ -69,12 +84,19 @@ public class SecurityConfig { //도메인 간의 요청에 대한 보안설정
 
         //특정 요청 URL에 대한 권한 설정
         http.authorizeHttpRequests(auth -> {
-            auth.requestMatchers("/auth/**").permitAll(); //해당 경로의 경우 인증 필요X
-            auth.anyRequest().authenticated(); //해당 경로가 아닌 요청은 모두 인증 필요O
-//            auth.anyRequest().permitAll(); //인증 없이 모든 요청가능
+            //해당 경로의 경우 인증 필요X
+            auth.requestMatchers("/auth/test","/auth/signup").permitAll();
+            //해당 경로가 아닌 요청은 모두 인증 필요O
+            auth.anyRequest().authenticated();
+//            auth.anyRequest().permitAll(); 인증 없이 모든 요청가능
         });
 
-        //무상태(Stateless) 방식
+        //커스텀 필터 호출
+        //UsernamePasswordAuthenticationFilter로 이동 전에 jwtAuthenticationFilter로 이동
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+
+        //비상태(Stateless) 방식
         http.sessionManagement(Session
                 -> Session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
