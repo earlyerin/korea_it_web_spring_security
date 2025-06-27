@@ -1,10 +1,14 @@
 package com.koreait.SpringSecurityStudy.controller;
 
+import com.koreait.SpringSecurityStudy.dto.ModifyEmailReqDto;
+import com.koreait.SpringSecurityStudy.dto.ModifyPasswordReqDto;
 import com.koreait.SpringSecurityStudy.dto.SignInReqDto;
 import com.koreait.SpringSecurityStudy.dto.SignUpReqDto;
+import com.koreait.SpringSecurityStudy.security.model.PrincipalUser;
 import com.koreait.SpringSecurityStudy.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +33,7 @@ public class AuthController {
         return ResponseEntity.ok(authService.signin(signInReqDto));
     }
 
-    @GetMapping("/principal") //회원정보
+    @GetMapping("/principal") //회원정보(토큰 인증 필요)
     public ResponseEntity<?> getPrincipal() {
         //필터를 지나며 SecurityContextHolder에 저장된 Principal 객체 반환
         return ResponseEntity.ok(SecurityContextHolder.getContext().getAuthentication());
@@ -74,7 +78,27 @@ public class AuthController {
             "name": "gildong"
         }
          */
+    }
 
+    @PostMapping("/modify/email/{userId}") //이메일 변경(토큰 인증 필요)
+    public ResponseEntity<?> modifyEmail(
+            @PathVariable Integer userId, @RequestBody ModifyEmailReqDto modifyEmailReqDto){
+        return ResponseEntity.ok(authService.modifyEmail(userId, modifyEmailReqDto));
+    }
 
+    @PostMapping("modify/password/{userId}")
+    public ResponseEntity<?> modifyPassword(
+            @PathVariable Integer userId,
+            @RequestBody ModifyPasswordReqDto modifyPasswordReqDto,
+            @AuthenticationPrincipal PrincipalUser principalUser){
+        /*
+        @AuthenticationPrincipal
+        SecurityContextHolder의 principal 객체를 가져오도록 명시
+         */
+        //userId 확인
+        if(!principalUser.getUserId().equals(userId)){
+            return ResponseEntity.badRequest().body("본인의 계정이 아닙니다.");
+        }
+        return ResponseEntity.ok(authService.modifyPassword(modifyPasswordReqDto,principalUser));
     }
 }

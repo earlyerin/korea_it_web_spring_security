@@ -84,8 +84,15 @@ public class SecurityConfig { //도메인 간의 요청에 대한 보안설정
 
         //특정 요청 URL에 대한 권한 설정
         http.authorizeHttpRequests(auth -> {
+            /*
+            DB 권한명      URL 권한 설정
+            ROLE_ADMIN    hasRole("ADMIN")
+            ADMIN         hasAuthority("ADMIN")
+             */
+            //해당 경로의 경우 관리자 권한을 가진 사용자만 요청 가능
+            auth.requestMatchers("/auth/test").hasRole("ADMIN");
             //해당 경로의 경우 인증 필요X
-            auth.requestMatchers("/auth/test","/auth/signup", "/auth/signin").permitAll();
+            auth.requestMatchers("/auth/signup", "/auth/signin").permitAll();
             //해당 경로가 아닌 요청은 모두 인증 필요O
             auth.anyRequest().authenticated();
 //            auth.anyRequest().permitAll(); 인증 없이 모든 요청가능

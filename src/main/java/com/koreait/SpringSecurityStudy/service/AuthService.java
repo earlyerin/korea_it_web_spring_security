@@ -1,14 +1,14 @@
 package com.koreait.SpringSecurityStudy.service;
 
-import com.koreait.SpringSecurityStudy.dto.ApiRespDto;
-import com.koreait.SpringSecurityStudy.dto.SignInReqDto;
-import com.koreait.SpringSecurityStudy.dto.SignUpReqDto;
+import com.koreait.SpringSecurityStudy.dto.*;
 import com.koreait.SpringSecurityStudy.entity.User;
 import com.koreait.SpringSecurityStudy.entity.UserRole;
 import com.koreait.SpringSecurityStudy.repository.UserRepository;
 import com.koreait.SpringSecurityStudy.repository.UserRoleRepository;
 import com.koreait.SpringSecurityStudy.security.jwt.JwtUtil;
+import com.koreait.SpringSecurityStudy.security.model.PrincipalUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +31,7 @@ public class AuthService {
     public ApiRespDto<?> addUser(SignUpReqDto signUpReqDto){
         //DTO에서 Entity로 변환 시 bCryptPasswordEncoder를 사용해 비밀번호 암호화하여 전달
         Optional<User> user = userRepository.addUser(signUpReqDto.toEntity(bCryptPasswordEncoder));
+        //회원이름 중복 확인
 
         //권한 부여
         UserRole userRole = UserRole.builder()
@@ -59,6 +60,27 @@ public class AuthService {
         //토큰을 생성 (반환된 토큰은 Local Storage에 저장)
         String token = jwtUtil.generateAccessToken(String.valueOf(user.getUserId()));
         return new ApiRespDto<>("success", "로그인이 완료되었습니다.", token);
+    }
+
+    public ApiRespDto<?> modifyEmail(Integer userId, ModifyEmailReqDto modifyEmailReqDto){
+        User user = modifyEmailReqDto.toEntity(userId);
+        int result = userRepository.updateEmail(user);
+        return new ApiRespDto<>("success", "이메일을 변경하였습니다.", result);
+    }
+
+    public ApiRespDto<?> modifyPassword
+            (ModifyPasswordReqDto modifyPasswordReqDto, PrincipalUser principalUser){
+        //현재 비밀번호 확인
+        if(!bCryptPasswordEncoder.matches(modifyPasswordReqDto.getOldPassword(), principalUser.getPassword())){
+            return new ApiRespDto<>("failed", "사용자 정보를 확인하세요.", null);
+        }
+        //새로운 비밀번호로 두번 입력받은 필드끼리 비교
+        if(!modifyPasswordReqDto.getNewPassword().equals(modifyPasswordReqDto.getNewPasswordCheck())){
+            return new ApiRespDto<>("failed", "새 비밀번호가 일치하지 않습니다.", null);
+        }
+        int result = userRepository.updatePassword(principalUser.getUserId(),
+                bCryptPasswordEncoder.encode(modifyPasswordReqDto.getNewPassword())); //비밀번호 암호화
+        return new ApiRespDto<>("success", "비밀번호를 변경하였습니다.", result);
     }
 
 
