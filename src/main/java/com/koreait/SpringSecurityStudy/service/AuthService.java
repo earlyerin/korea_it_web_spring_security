@@ -1,9 +1,13 @@
 package com.koreait.SpringSecurityStudy.service;
 
 import com.koreait.SpringSecurityStudy.dto.ApiRespDto;
+import com.koreait.SpringSecurityStudy.dto.SignInReqDto;
 import com.koreait.SpringSecurityStudy.dto.SignUpReqDto;
 import com.koreait.SpringSecurityStudy.entity.User;
+import com.koreait.SpringSecurityStudy.entity.UserRole;
 import com.koreait.SpringSecurityStudy.repository.UserRepository;
+import com.koreait.SpringSecurityStudy.repository.UserRoleRepository;
+import com.koreait.SpringSecurityStudy.security.jwt.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,21 +20,46 @@ public class AuthService {
     private UserRepository userRepository;
 
     @Autowired
+    private UserRoleRepository userRoleRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public ApiRespDto<?> addUser(SignUpReqDto signUpReqDto){
-        //toEntity를 통해 전달 객체에서 엔티티로 변환 시 bCryptPasswordEncoder를 사용해 비밀번호 암호화
-        int result = userRepository.addUser(signUpReqDto.toEntity(bCryptPasswordEncoder));
+        //DTO에서 Entity로 변환 시 bCryptPasswordEncoder를 사용해 비밀번호 암호화하여 전달
+        Optional<User> user = userRepository.addUser(signUpReqDto.toEntity(bCryptPasswordEncoder));
 
-        //이메일 중복 확인
-
-        return new ApiRespDto<>("success", "회원가입이 완료되었습니다.", result);
+        //권한 부여
+        UserRole userRole = UserRole.builder()
+                .userId(user.get().getUserId())
+                .roleId(3) //처음 회원가입 시 임시사용자(3)로 지정
+                .build();
+         Optional<UserRole> optionalUserRole = userRoleRepository.insert(userRole); //DB에 추가
+        if(optionalUserRole.isEmpty()){
+            return new ApiRespDto<>("failed", "권한 부여에 실패했습니다.",null);
+        }
+        return new ApiRespDto<>("success", "회원가입이 완료되었습니다.", user);
     }
 
-//    public ApiRespDto<?> getUserByUserId(Integer userId){
-//        Optional<User> user = userRepository.getUserByUserId(userId);
-//        if (user.isEmpty()){
-//            return new ApiRespDto<>("null", )
-//        }
-//    }
+    public ApiRespDto<?> signin(SignInReqDto signInReqDto){
+        Optional<User> optionalUser = userRepository.getUserByUserName(signInReqDto.getUserName());
+        //회원의 이름이 일치하는지 확인
+        if(optionalUser.isEmpty()){
+            return new ApiRespDto<>("failed", "사용자 정보를 확인해주세요.", null);
+        }
+        User user = optionalUser.get(); //DB 데이터
+        //비밀번호가 일치하는지 확인
+        if(!bCryptPasswordEncoder.matches(signInReqDto.getPassword(), user.getPassword())){
+            return new ApiRespDto<>("failed", "사용자 정보를 확인해주세요.", null);
+        }
+        System.out.println("로그인 성공");
+        //토큰을 생성 (반환된 토큰은 Local Storage에 저장)
+        String token = jwtUtil.generateAccessToken(String.valueOf(user.getUserId()));
+        return new ApiRespDto<>("success", "로그인이 완료되었습니다.", token);
+    }
+
+
 }

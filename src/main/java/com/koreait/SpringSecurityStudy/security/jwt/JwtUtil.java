@@ -29,6 +29,21 @@ public class JwtUtil { //Custom Filter에 사용할 메서드 구현
                 //new Date().getTime() + (1000L * 60L * 60L * 24L * 30L) : 현재로 부터 30일 뒤 => 토큰의 만료기간 지정
                 .signWith(KEY) //토큰에 서명을 적용
                 .compact(); //설정한 내용을 바탕으로 최종 문자열 형태의 JWT 생성
+        /*
+        eyJhbGciOiJIUzUxMiJ9. (Header)
+        eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImp0aSI6IjEiLCJleHAiOjE3NTM1NjUzODl9. (Payload)
+        q5Ar6xTkrczyx9v_T0ZxNNWNUePQQj-_HTJvtVGvaGPnA0rJnW_urSzsh86HdEjvt7N5CJ75yRtSC4_EP5Vdew (Signature)
+        [Header]
+        {
+            "alg": "HS512"
+        }
+        [Payload]
+        {
+            "sub": "AccessToken",
+            "jti": "1",
+            "exp": 1753565389
+        }
+         */
     }
 
     //유효한 토큰인지 확인

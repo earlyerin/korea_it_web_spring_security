@@ -3,7 +3,11 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.koreait.SpringSecurityStudy.mapper.UserMapper">
-    <insert id="addUser">
+    <insert id="addUser" useGeneratedKeys="true" keyProperty="userId">
+        <!--
+        useGeneratedKeys="true" => 자동 생성된 키 값들을 가져올 거라는 것을 명시
+        keyProperty="userId" => user 객체에 id 값을 set
+        -->
         INSERT INTO
             user_tb
         VALUES
@@ -14,7 +18,15 @@
             *
         FROM
             user_tb
-        WHERE
+        WHERE랴
             user_id = #{userId};
+    </select>
+    <select id="getUserByUserName">
+        SELECT
+            *
+        FROM
+            user_tb
+        WHERE
+            user_name = #{userName};
     </select>
 </mapper>

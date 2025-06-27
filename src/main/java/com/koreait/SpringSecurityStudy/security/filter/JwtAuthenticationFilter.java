@@ -20,7 +20,7 @@ import java.util.Optional;
 
 /*
  AuthenticationFilter
- 요청을 가로채고, 가로챈 정보를 통해 유저 자격을 기반으로 인증 토큰 생성
+ 요청을 가로채고, 가로챈 정보를 통해 유저 자격을 기반으로 토큰 인증
  */
 @Component //Bean 등록
 public class JwtAuthenticationFilter implements Filter { //Custom AuthenticationFilter
@@ -55,6 +55,7 @@ public class JwtAuthenticationFilter implements Filter { //Custom Authentication
                 String id = claims.getId(); //고유 식별자 반환
                 Integer userId = Integer.parseInt(id);
                 Optional<User> optionalUser = userRepository.getUserByUserId(userId); //고유 식별자로 DB 조회
+                System.out.println(optionalUser.get());
         //UserDetails에서의 객체생성 역할 구현
                 //DB에서 조회 후 반환된 User 객체가 존재하면 principalUser 객체로 변환
                 optionalUser.ifPresentOrElse((user) -> {
@@ -63,11 +64,12 @@ public class JwtAuthenticationFilter implements Filter { //Custom Authentication
                             .userName(user.getUserName())
                             .password(user.getPassword())
                             .userEmail(user.getUserEmail())
+                            .userRoles(user.getUserRole())
                             .build();
         //UsernamePasswordAuthenticationToken 생성 및 SecurityContext에 저장 구현
                     Authentication authentication = new UsernamePasswordAuthenticationToken
-                            (principalUser, "", principalUser.getAuthorities());
-                             //인증된 객체, 비밀번호(이미 인증되었으므로 생략), 권한들
+                            (principalUser, null, principalUser.getAuthorities());
+                             //인증된 객체, 비밀번호(로그인에서 이미 인증되었으므로 생략), 권한 객체들의 집합
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     //Security Context에 인증된 객체를 저장하면 이후 요청(Filter를 거칠 때)은 인증된 사용자로 간주

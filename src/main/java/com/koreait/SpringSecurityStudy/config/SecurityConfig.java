@@ -85,16 +85,15 @@ public class SecurityConfig { //도메인 간의 요청에 대한 보안설정
         //특정 요청 URL에 대한 권한 설정
         http.authorizeHttpRequests(auth -> {
             //해당 경로의 경우 인증 필요X
-            auth.requestMatchers("/auth/test","/auth/signup").permitAll();
+            auth.requestMatchers("/auth/test","/auth/signup", "/auth/signin").permitAll();
             //해당 경로가 아닌 요청은 모두 인증 필요O
             auth.anyRequest().authenticated();
 //            auth.anyRequest().permitAll(); 인증 없이 모든 요청가능
         });
 
-        //커스텀 필터 호출
+        //커스텀 필터 호출(인증)
         //UsernamePasswordAuthenticationFilter로 이동 전에 jwtAuthenticationFilter로 이동
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
 
         //비상태(Stateless) 방식
         http.sessionManagement(Session
