@@ -29,7 +29,7 @@ public class User {
     DB JOIN으로 데이터를 가져오는 것이 아닌 필드로 추가하는 이유는?
     - JAVA 객체 지향 설계를 위해 객체를 참조할 수 있는 구조로 구현
      */
-    private List<UserRole> userRole;
+    private List<UserRole> userRoles;
 
 }
 

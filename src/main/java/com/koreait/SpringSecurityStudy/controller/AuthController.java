@@ -35,22 +35,46 @@ public class AuthController {
         return ResponseEntity.ok(SecurityContextHolder.getContext().getAuthentication());
         /*
         {
-          "authorities": [],
+            "authorities": [
+                {
+                    "authority": "ROLE_TEMPORARY"
+                }
+            ],
             "details": null,
             "authenticated": true, (인증됨)
             "principal": {
                 "userId": 1,
-                "userEmail": "gildong@naver.com",
+                "userEmail": null,
+                "userRoles": [ => 권한 리스트
+                    {
+                        "userRoleId": 1,
+                        "userId": 1,
+                        "roleId": 3,
+                        "regDt": "2025-06-27T11:35:58",
+                        "updDt": null,
+                        "role": {
+                            "roleId": 3,
+                            "roleName": "ROLE_TEMPORARY",
+                            "roleNameKor": "임시사용자"
+                        }
+                    }
+                ],
                 "enabled": true, (계정 활성화)
-                "authorities": [],
-                "accountNonLocked": true, (계정 잠금)
+                "authorities": [ => 권한 리스트
+                    {
+                        "authority": "ROLE_TEMPORARY"
+                    }
+                ],
                 "username": "gildong",
+                "accountNonExpired": true, (계정 만료 기간)
                 "credentialsNonExpired": true, (비밀번호 만료 기간)
-                "accountNonExpired": true (계정 만료 기간)
+                "accountNonLocked": true  (계정 잠금)
             },
             "credentials": null,
             "name": "gildong"
         }
          */
+
+
     }
 }

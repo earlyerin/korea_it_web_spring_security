@@ -3,6 +3,46 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.koreait.SpringSecurityStudy.mapper.UserMapper">
+    <!--
+    resultMap
+    - 복잡한 결과 매핑(조인 등)을 수행할 때 간편하게 수행이 가능하도록 만들어주기 위해 사용하는 태그
+    - SELECT문에서 JOIN 했을 때 반환된 데이터를 담을 DTO를 만들 필요없이 각 객체에 매핑
+    -->
+    <!-- id:"resultMap의 식별명" type:"조회결과를 담을 객체" -->
+    <resultMap id="RoleResultMap" type="com.koreait.SpringSecurityStudy.entity.Role">
+        <!--기본키(참조키) property:필드 column:컬럼-->
+        <id property="roleId" column="role_id" />
+        <!--나머지 속성-->
+        <result property="roleName" column="role_name" />
+        <result property="roleNameKor" column="role_name_kor" />
+    </resultMap>
+    <resultMap id="UserRoleResultMap" type="com.koreait.SpringSecurityStudy.entity.UserRole">
+        <id property="userRoleId" column="user_role_id" />
+        <result property="userId" column="urt_user_id" />
+        <result property="roleId" column="urt_role_id" />
+        <result property="regDt" column="reg_dt" />
+        <result property="updDt" column="upd_dt" />
+        <!--
+        association
+        - 1:1 또는 N:1 관계일 때 사용
+        - 단일 객체 매핑
+        -->
+        <!--UserRole(N) 객체에 Role객체(1)를 매핑 (관계)-->
+        <association property="role" resultMap="RoleResultMap" />
+    </resultMap>
+    <resultMap id="UserResultMap" type="com.koreait.SpringSecurityStudy.entity.User">
+        <id property="userId" column="user_id" />
+        <result property="userName" column="user_name" />
+        <result property="password" column="password" />
+        <result property="userEmail" column="user_email " />
+        <!--
+        collection
+        - 1:N 또는 N:M 관계일 때 사용
+        - 다수 객체(List, Set 등) 매핑
+        -->
+        <!--User(M) 객체에 권한의 집합인 userRoles(N) 리스트를 매핑-->
+        <collection property="userRoles" resultMap="UserRoleResultMap" />
+    </resultMap>
     <insert id="addUser" useGeneratedKeys="true" keyProperty="userId">
         <!--
         useGeneratedKeys="true" => 자동 생성된 키 값들을 가져올 거라는 것을 명시
@@ -13,20 +53,50 @@
         VALUES
             (0, #{userName}, #{password}, #{userEmail});
     </insert>
-    <select id="getUserByUserId">
+    <select id="getUserByUserId" resultMap="UserResultMap">
         SELECT
-            *
+            ut.user_id,
+            ut.user_name,
+            ut.password,
+            ut.user_email,
+
+            urt.user_role_id,
+            urt.user_id AS urt_user_id, -- 각 테이블에 같은 컬럼명이 있는 경우 별칭 부여
+            urt.role_id AS urt_role_id,
+            urt.reg_dt,
+            urt.upd_dt,
+
+            rt.role_id,
+            rt.role_name,
+            rt.role_name_kor
         FROM
-            user_tb
-        WHERE랴
-            user_id = #{userId};
-    </select>
-    <select id="getUserByUserName">
-        SELECT
-            *
-        FROM
-            user_tb
+            user_tb AS ut
+            LEFT JOIN user_role_tb AS urt ON(ut.user_id = urt.user_id)
+            LEFT JOIN role_tb AS rt ON(rt.role_id = urt.role_id)
         WHERE
-            user_name = #{userName};
+            ut.user_id = #{userId};
+    </select>
+    <select id="getUserByUserName" resultMap="UserResultMap">
+        SELECT
+            ut.user_id,
+            ut.user_name,
+            ut.password,
+            ut.user_email,
+
+            urt.user_role_id,
+            urt.user_id AS urt_user_id,
+            urt.role_id AS urt_role_id,
+            urt.reg_dt,
+            urt.upd_dt,
+
+            rt.role_id,
+            rt.role_name,
+            rt.role_name_kor
+        FROM
+            user_tb AS ut
+            LEFT JOIN user_role_tb AS urt ON(ut.user_id = urt.user_id)
+            LEFT JOIN role_tb AS rt ON(rt.role_id = urt.role_id)
+        WHERE
+            ut.user_name = #{userName};
     </select>
 </mapper>
