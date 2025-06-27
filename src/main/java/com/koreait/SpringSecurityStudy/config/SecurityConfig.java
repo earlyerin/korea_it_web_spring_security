@@ -1,6 +1,8 @@
 package com.koreait.SpringSecurityStudy.config;
 
 import com.koreait.SpringSecurityStudy.security.filter.JwtAuthenticationFilter;
+import com.koreait.SpringSecurityStudy.security.handler.OAuth2SuccessHandler;
+import com.koreait.SpringSecurityStudy.service.OAuth2PrincipalUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +21,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig { //도메인 간의 요청에 대한 보안설정
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private OAuth2PrincipalUserService oAuth2PrincipalUserService;
+
+    @Autowired
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
 
     /*
      BCryptPasswordEncoder
@@ -82,6 +90,14 @@ public class SecurityConfig { //도메인 간의 요청에 대한 보안설정
         //HTTP 프로토콜 기본 로그인 방식 비활성화
         http.httpBasic(httpBasic -> httpBasic.disable());
 
+        //커스텀 필터 호출(인증)
+        //UsernamePasswordAuthenticationFilter로 이동 전에 jwtAuthenticationFilter로 이동
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        //비상태(Stateless) 방식
+        http.sessionManagement(Session
+                -> Session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
         //특정 요청 URL에 대한 권한 설정
         http.authorizeHttpRequests(auth -> {
             /*
@@ -98,13 +114,11 @@ public class SecurityConfig { //도메인 간의 요청에 대한 보안설정
 //            auth.anyRequest().permitAll(); 인증 없이 모든 요청가능
         });
 
-        //커스텀 필터 호출(인증)
-        //UsernamePasswordAuthenticationFilter로 이동 전에 jwtAuthenticationFilter로 이동
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        //비상태(Stateless) 방식
-        http.sessionManagement(Session
-                -> Session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.oauth2Login(oauth2 ->
+                oauth2.userInfoEndpoint(userInfo ->
+                                userInfo.userService(oAuth2PrincipalUserService))
+                        .successHandler(oAuth2SuccessHandler)
+        );
         return http.build();
     }
 }
