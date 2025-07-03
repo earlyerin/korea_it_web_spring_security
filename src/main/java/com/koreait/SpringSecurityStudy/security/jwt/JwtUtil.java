@@ -24,7 +24,7 @@ public class JwtUtil { //Custom Filter에 사용할 메서드 구현
     public String generateAccessToken(String id){
         return Jwts.builder()
                 .subject("AccessToken") //토큰의 용도를 설명하는 식별자 역할
-                .id(id) //토큰의 고유한 식별자 부여(사용자 id, email 등) => 사용자 무효화나 조회에 사용
+                .id(id) //토큰의 고유한 식별자 부여(userId) => 사용자 무효화나 조회에 사용
                 .expiration(new Date(new Date().getTime() + (1000L * 60L * 60L * 24L * 30L)))
                 //new Date().getTime() + (1000L * 60L * 60L * 24L * 30L) : 현재로 부터 30일 뒤 => 토큰의 만료기간 지정
                 .signWith(KEY) //토큰에 서명(signature)을 적용

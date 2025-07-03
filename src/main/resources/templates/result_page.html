@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="http://www.thymeleaf.org" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>이메일 인증 결과 페이지</title>
+</head>
+<body>
+    <!-- JavaScript -->
+    <script th:inline="javascript">
+        let message = [[${message}]] <!-- resultMap의 message 대입 -->
+        alert(message); <!-- 페이지에 팝업창으로 message를 띄워줌-->
+        window.close(); <!-- 브라우저 창이나 탭을 닫음(주로 팝업창을 닫을 때 사용)-->
+    </script>
+</body>
+</html>

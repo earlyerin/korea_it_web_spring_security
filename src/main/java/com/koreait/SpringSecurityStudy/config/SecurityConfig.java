@@ -111,7 +111,9 @@ public class SecurityConfig { //도메인 간의 요청에 대한 보안설정
                     "/auth/signup",
                             "/auth/signin",
                             "/oauth2/**",
-                            "/login/oauth2/**")
+                            "/login/oauth2/**",
+                            "/mail/verify"
+                    )
                     .permitAll();
             //해당 경로가 아닌 요청은 모두 인증 필요O
             auth.anyRequest().authenticated();
