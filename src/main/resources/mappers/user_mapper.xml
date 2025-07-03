@@ -34,7 +34,7 @@
         <id property="userId" column="user_id" />
         <result property="userName" column="user_name" />
         <result property="password" column="password" />
-        <result property="userEmail" column="user_email " />
+        <result property="userEmail" column="user_email" />
         <!--
         collection
         - 1:N 또는 N:M 관계일 때 사용
