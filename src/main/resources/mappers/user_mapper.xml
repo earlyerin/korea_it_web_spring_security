@@ -99,6 +99,29 @@
         WHERE
             ut.user_name = #{userName};
     </select>
+    <select id="getUserByUserEmail" resultMap="UserResultMap">
+        SELECT
+            ut.user_id,
+            ut.user_name,
+            ut.password,
+            ut.user_email,
+
+            urt.user_role_id,
+            urt.user_id AS urt_user_id,
+            urt.role_id AS urt_role_id,
+            urt.reg_dt,
+            urt.upd_dt,
+
+            rt.role_id,
+            rt.role_name,
+            rt.role_name_kor
+        FROM
+            user_tb AS ut
+            LEFT JOIN user_role_tb AS urt ON(ut.user_id = urt.user_id)
+            LEFT JOIN role_tb AS rt ON(rt.role_id = urt.role_id)
+        WHERE
+            ut.user_email = #{userEmail};
+    </select>
     <update id="updateEmail">
         UPDATE
             user_tb

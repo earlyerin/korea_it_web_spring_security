@@ -58,11 +58,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             response.sendRedirect("http://localhost:3000/auth/oauth2?provider=" + provider
                     + "&providerUserId=" + providerUserId
                     + "&email=" + email);
+            return;
         }
         //DB 연동되어 있는 경우
         Optional<User> user = userRepository.getUserByUserId(oAuth2User.getUserId());
-
-        //OAuth2 로그인을 통해 회원가입이나 연동을 진행한 경우
         String accessToken = null;
         if (user.isPresent()){
             //JWT 토큰 생성

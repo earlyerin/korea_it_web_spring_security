@@ -12,4 +12,10 @@
             provider = #{provider}
             AND provider_user_id = #{providerUserId};
     </select>
+    <insert id="insertOAuth2User">
+        INSERT INTO
+            oauth2_user_tb
+        VALUES
+            (0, #{userId}, #{provider}, #{providerUserId}, now(), null);
+    </insert>
 </mapper>

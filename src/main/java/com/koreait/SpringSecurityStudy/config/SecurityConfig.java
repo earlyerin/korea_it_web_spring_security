@@ -108,7 +108,10 @@ public class SecurityConfig { //도메인 간의 요청에 대한 보안설정
             auth.requestMatchers("/auth/test").hasRole("ADMIN");
             //해당 경로의 경우 인증 필요X
             auth.requestMatchers(
-                    "/auth/signup", "/auth/signin")
+                    "/auth/signup",
+                            "/auth/signin",
+                            "/oauth2/**",
+                            "/login/oauth2/**")
                     .permitAll();
             //해당 경로가 아닌 요청은 모두 인증 필요O
             auth.anyRequest().authenticated();
@@ -133,15 +136,18 @@ public class SecurityConfig { //도메인 간의 요청에 대한 보안설정
                          .successHandler(oAuth2SuccessHandler)
         );
         /*
-        applicaion.properties에 명시
-        GCP(Google Cloud Platform)
+        GCP(Google Cloud Platform) : 클라이언트(앱, 내 서비스) 등록
         새 프로젝트 -> 대시보드 -> API 및 서비스 -> 사용자 인증 정보
         -> OAuth 2.0 클라이언트 ID -> 사용자 인증 정보 만들기
         -> OAuth 클라이언트 만들기(승인된 리디렉션 URI = http://localhost:8080/login/oauth2/code/google)
-        -> 클라이언트 ID, 클라이언트 보안 비밀번호, scope 설정 작성
         **승인된 리디렉션 URI : 공급자가 accessToken을 발급한 뒤 리디렉션할 URI, 미리 등록된 주소로만 허용(보안)
            applicaion.properties의 spring.security.oauth2.client.registration."google" 로 매핑
         **scope : 요청할 정보 명시
+
+        Oauth2 공급자로 부터 권한을 위임 받기 위해 applicaion.properties에 클라이언트 정보 명시
+        -> 클라이언트 ID, 클라이언트 보안 비밀번호, scope 설정 작성 (내 서버에 대한 증명, 인증 정보)
+
+        localhost:8080/oauth2/authorization/google => Security에서 정해놓은 경로로 OAuth2 로그인 확인
          */
 
         return http.build();
