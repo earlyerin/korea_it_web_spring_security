@@ -1,5 +1,6 @@
 package com.koreait.SpringSecurityStudy.controller;
 
+import com.koreait.SpringSecurityStudy.dto.OAuth2MergerReqDto;
 import com.koreait.SpringSecurityStudy.dto.OAuth2SignupReqDto;
 import com.koreait.SpringSecurityStudy.service.OAuth2AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,11 @@ public class OAuth2Controller {
         eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImp0aSI6IjIiLCJleHAiOjE3NTQxMTA3Mjh9.
         GrFHhC22mhgoSp11n5ZtoRPLKMMhdtEbKt14hGSkfX5syyIvyAfpGX1CVIe3Jm6UQVdxU8T-pmW5oeUVfmjBLA
          */
+    }
+
+    @PostMapping("/merge") //OAuth2 로그인 후 user로 회원가입은 했지만 oauth2 연동은 되지 않은 사용자일 경우 해당 경로로 연동
+    public ResponseEntity<?> merge(@RequestBody OAuth2MergerReqDto oAuth2MergerReqDto){
+        return ResponseEntity.ok(oAuth2AuthService.merge(oAuth2MergerReqDto));
     }
 
 

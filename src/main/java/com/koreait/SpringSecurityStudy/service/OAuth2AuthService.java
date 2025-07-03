@@ -1,6 +1,7 @@
 package com.koreait.SpringSecurityStudy.service;
 
 import com.koreait.SpringSecurityStudy.dto.ApiRespDto;
+import com.koreait.SpringSecurityStudy.dto.OAuth2MergerReqDto;
 import com.koreait.SpringSecurityStudy.dto.OAuth2SignupReqDto;
 import com.koreait.SpringSecurityStudy.entity.User;
 import com.koreait.SpringSecurityStudy.entity.UserRole;
@@ -54,8 +55,24 @@ public class OAuth2AuthService {
         return new ApiRespDto<>("success", "OAuth2 회원가입이 완료되었습니다.", result);
     }
 
-    //OAuth2 연동
-    public ApiRespDto<?> merger(){
+    //OAuth2 연동 (회원가입된 사용자의 연동 요청)
+    public ApiRespDto<?> merge(OAuth2MergerReqDto oAuth2MergerReqDto){
+        //연동 요청된 사용자 이름으로 가입된 사용자가 있는지 확인
+        Optional<User> user = userRepository.getUserByUserName(oAuth2MergerReqDto.getUserName());
+        if(user.isEmpty()){
+            return new ApiRespDto<>("failed", "사용자 정보를 확인하세요.", null);
+        }
 
+        //비밀번호가 일치하는지 확인
+        if(!bCryptPasswordEncoder.matches(oAuth2MergerReqDto.getPassword(), user.get().getPassword())){
+            return new ApiRespDto<>("failed", "사용자 정보를 확인하세요.", null);
+        }
+
+        int result = oAuth2UserRepository.insertOAuth2User(oAuth2MergerReqDto.toEntityOAuth2User(user.get().getUserId()));
+        if(result == 0){
+            return new ApiRespDto<>("failed", "오류가 발생했습니다.", null);
+        }
+
+        return new ApiRespDto<>("success", "OAuth2 연동이 완료되었습니다.", null);
     }
 }
