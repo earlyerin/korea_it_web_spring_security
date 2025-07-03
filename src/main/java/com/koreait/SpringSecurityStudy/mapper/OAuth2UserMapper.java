@@ -1,9 +1,10 @@
 package com.koreait.SpringSecurityStudy.mapper;
 
-import com.koreait.SpringSecurityStudy.entity.Oauth2User;
+import com.koreait.SpringSecurityStudy.entity.OAuth2User;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper
 public interface OAuth2UserMapper {
-    Oauth2User getOAuh2UserByProviderAndProviderUserId(String provider, String providerUserId);
+    OAuth2User getOAuth2UserByProviderAndProviderUserId(String provider, String providerUserId);
 }

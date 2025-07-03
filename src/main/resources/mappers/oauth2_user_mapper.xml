@@ -3,13 +3,13 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.koreait.SpringSecurityStudy.mapper.OAuth2UserMapper">
-    <select id="getOAuh2UserByProviderAndProviderUserId">
+    <select id="getOAuth2UserByProviderAndProviderUserId">
         SELECT
             *
         FROM
             oauth2_user_tb
         WHERE
-            provider = #{provider} AND
-            provider_user_id = #{providerUserId};
+            provider = #{provider}
+            AND provider_user_id = #{providerUserId};
     </select>
 </mapper>

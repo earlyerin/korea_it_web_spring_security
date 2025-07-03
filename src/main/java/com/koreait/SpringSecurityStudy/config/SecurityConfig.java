@@ -4,7 +4,6 @@ import com.koreait.SpringSecurityStudy.security.filter.JwtAuthenticationFilter;
 import com.koreait.SpringSecurityStudy.security.handler.OAuth2SuccessHandler;
 import com.koreait.SpringSecurityStudy.service.OAuth2PrincipalUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -108,17 +107,43 @@ public class SecurityConfig { //도메인 간의 요청에 대한 보안설정
             //해당 경로의 경우 관리자 권한을 가진 사용자만 요청 가능
             auth.requestMatchers("/auth/test").hasRole("ADMIN");
             //해당 경로의 경우 인증 필요X
-            auth.requestMatchers("/auth/signup", "/auth/signin").permitAll();
+            auth.requestMatchers(
+                    "/auth/signup", "/auth/signin")
+                    .permitAll();
             //해당 경로가 아닌 요청은 모두 인증 필요O
             auth.anyRequest().authenticated();
 //            auth.anyRequest().permitAll(); 인증 없이 모든 요청가능
         });
 
-        http.oauth2Login(oauth2 ->
-                oauth2.userInfoEndpoint(userInfo ->
-                                userInfo.userService(oAuth2PrincipalUserService))
-                        .successHandler(oAuth2SuccessHandler)
+        /*
+        OAuth2 로그인에 대한 설정
+        - userInfoEndPoint() : 사용자 정보를 요청하는 엔드포인트
+        - userService() : OAuth2 공급자로 부터 사용자 정보를 받아와서 파싱할 방식 설정
+        - successHandler() : 사용자 정보 파싱 후 호출할 핸들러 설정
+        **Endpoint란, 클라이언트가 서버에 요청을 보내는 특정 URL 경로
+        - 흐름
+            Spring Filter 에서 OAuth2 요청을 감지
+            → 해당 공급자의 로그인 페이지로 리디렉션
+            → OAuth2 로그인 요청이 성공하면 아래 설정대로 이동
+        **Redirection이란, 사용자가 요청한 URL 대신 다른 URL로 자동으로 이동하도록 설정하는 것
+         */
+        http.oauth2Login(oauth2
+                -> oauth2.userInfoEndpoint(userInfo
+                                            -> userInfo.userService(oAuth2PrincipalUserService))
+                         .successHandler(oAuth2SuccessHandler)
         );
+        /*
+        applicaion.properties에 명시
+        GCP(Google Cloud Platform)
+        새 프로젝트 -> 대시보드 -> API 및 서비스 -> 사용자 인증 정보
+        -> OAuth 2.0 클라이언트 ID -> 사용자 인증 정보 만들기
+        -> OAuth 클라이언트 만들기(승인된 리디렉션 URI = http://localhost:8080/login/oauth2/code/google)
+        -> 클라이언트 ID, 클라이언트 보안 비밀번호, scope 설정 작성
+        **승인된 리디렉션 URI : 공급자가 accessToken을 발급한 뒤 리디렉션할 URI, 미리 등록된 주소로만 허용(보안)
+           applicaion.properties의 spring.security.oauth2.client.registration."google" 로 매핑
+        **scope : 요청할 정보 명시
+         */
+
         return http.build();
     }
 }

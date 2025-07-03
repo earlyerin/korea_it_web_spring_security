@@ -31,7 +31,6 @@ public class AuthService {
     public ApiRespDto<?> addUser(SignUpReqDto signUpReqDto){
         //DTO에서 Entity로 변환 시 bCryptPasswordEncoder를 사용해 비밀번호 암호화하여 전달
         Optional<User> user = userRepository.addUser(signUpReqDto.toEntity(bCryptPasswordEncoder));
-        //회원이름 중복 확인
 
         //권한 부여
         UserRole userRole = UserRole.builder()
